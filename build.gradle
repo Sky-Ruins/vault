@@ -13,7 +13,6 @@ allprojects {
 
 subprojects {
   apply plugin: 'java'
-  apply plugin: 'checkstyle'
   apply plugin: 'net.minecrell.licenser'
 
   sourceCompatibility = '1.8'
@@ -49,11 +48,6 @@ subprojects {
     options.encoding = 'UTF-8'
   }
 
-  checkstyle {
-    toolVersion = '8.0'
-    configFile = rootProject.file('checkstyle.xml')
-  }
-
   task sourceJar(type: Jar) {
     classifier = 'sources'
     from sourceSets.main.allSource
@@ -67,18 +61,6 @@ subprojects {
   artifacts {
     archives sourceJar
     archives javadocJar
-  }
-
-  task checkstyle(dependsOn: tasks.withType(Checkstyle))
-
-  gradle.taskGraph.whenReady { TaskExecutionGraph graph ->
-    if (!graph.allTasks.contains(tasks.checkstyle)) {
-      graph.allTasks.findAll {
-        it.name.startsWith('checkstyle')
-      }.each {
-        it.enabled = false
-      }
-    }
   }
 
   apply from: rootProject.file('gradle/deploy.gradle')
