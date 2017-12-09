@@ -8,7 +8,7 @@ allprojects {
 
   group = 'org.natrolite'
   description = 'Vault is a Permissions and Economy API'
-  version = '1.6.1'
+  version = '1.6.2'
 }
 
 subprojects {
