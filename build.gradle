@@ -29,6 +29,10 @@ subprojects {
     testCompile group: 'org.bukkit', name: 'bukkit', version: '1.9-R0.1-SNAPSHOT'
   }
 
+  processResources {
+    from rootProject.file('LICENSE')
+  }
+
   license {
     header = rootProject.file('HEADER.txt')
     include '**/*.java'
