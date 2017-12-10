@@ -1,15 +1,12 @@
 language: java
+sudo: false
 
 jdk:
-  - openjdk8
   - oraclejdk8
-  - oraclejdk9
+  - openjdk8
 
+install: skip
 script: ./gradlew build
-
-branches:
-  except:
-    - gh-pages
 
 jobs:
   include:
@@ -19,12 +16,6 @@ jobs:
       install: pip install --user sphinx
       script: sphinx-build -W docs docs/build
 
-# Temporary!
-matrix:
-  fast_finish: true
-  allow_failures:
-    - jdk: oraclejdk9
-
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
@@ -33,6 +24,10 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
+
+branches:
+  except:
+    - gh-pages
 
 notifications:
   email: false
