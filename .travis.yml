@@ -11,6 +11,12 @@ branches:
   except:
     - gh-pages
 
+jobs:
+  include:
+    - stage: docs
+      python: 3.6
+      script: sphinx-build -W docs docs/build
+
 # Temporary!
 matrix:
   fast_finish: true
