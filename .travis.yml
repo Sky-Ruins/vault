@@ -15,6 +15,7 @@ jobs:
   include:
     - stage: docs
       python: 3.6
+      install: pip install sphinx
       script: sphinx-build -W docs docs/build
 
 # Temporary!
