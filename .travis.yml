@@ -11,6 +11,14 @@ branches:
   except:
     - gh-pages
 
+jobs:
+  include:
+    - stage: docs
+      sudo: required
+      python: 3.6
+      install: pip install --user sphinx
+      script: sphinx-build -W docs docs/build
+
 # Temporary!
 matrix:
   fast_finish: true
