@@ -11,6 +11,10 @@ allprojects {
   version = '1.6.2'
 }
 
+ext {
+  url = 'https://neolumia.com/'
+}
+
 subprojects {
   apply plugin: 'java'
   apply plugin: 'net.minecrell.licenser'
