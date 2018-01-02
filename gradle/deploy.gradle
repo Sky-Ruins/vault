@@ -31,6 +31,7 @@ publishing {
           name 'Vault'
           description project.description
           url project.url
+          inceptionYear 2018
 
           ciManagement {
             system 'Travis CI'
