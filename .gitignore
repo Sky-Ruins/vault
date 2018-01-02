@@ -1,25 +1,52 @@
-!gradle-wrapper.jar
+# Eclipse
+# -------
+/bin
+*.classpath
+*.project
+*.settings
+atlassian-ide-plugin.xml
+
+# Gradle
+# ------
 .gradle
 build/
 /local.properties
 gradle-app.setting
+!gradle-wrapper.jar
 
-.idea/
-/out/
-*.iml
-*.ipr
-*.iws
+# IDEA
+# ----
+.idea
+.shelf
+/*.iml
+/*.ipr
+/*.iws
+/out
 
-target/
-/dependency-reduced-pom.xml
+# Logs
+# ----
+*.log
 
-*.classpath
-*.project
-*.settings
-
-/dist/
-.nb-gradle/
+# NetBeans
+# --------
+dist/
+.nb-gradle
 .nb-gradle-properties
 
-atlassian-ide-plugin.xml
+# OS X
+# ----
 .DS_Store
+
+# Windows
+# -------
+*.stackdump
+*.lnk
+Desktop.ini
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+*.cab
+*.msi
+*.msm
+*.msp
+$RECYCLE.BIN/
