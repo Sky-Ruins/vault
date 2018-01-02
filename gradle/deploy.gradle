@@ -30,7 +30,7 @@ publishing {
 
           name 'Vault'
           description project.description
-          url 'https://neolumia.com/'
+          url project.url
 
           ciManagement {
             system 'Travis CI'
