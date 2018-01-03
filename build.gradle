@@ -13,6 +13,7 @@ allprojects {
 
 ext {
   url = 'https://neolumia.com/'
+  bukkitVersion = '1.9-R0.1-SNAPSHOT'
 }
 
 subprojects {
@@ -29,8 +30,8 @@ subprojects {
   }
 
   dependencies {
-    compileOnly group: 'org.bukkit', name: 'bukkit', version: '1.9-R0.1-SNAPSHOT'
-    testCompile group: 'org.bukkit', name: 'bukkit', version: '1.9-R0.1-SNAPSHOT'
+    compileOnly group: 'org.bukkit', name: 'bukkit', version: bukkitVersion
+    testCompile group: 'org.bukkit', name: 'bukkit', version: bukkitVersion
   }
 
   processResources {
