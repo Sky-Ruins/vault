@@ -1,6 +1,16 @@
-plugins {
-  id 'com.github.johnrengelman.shadow' version '2.0.1'
+buildscript {
+  repositories {
+    mavenCentral()
+    maven { url 'https://plugins.gradle.org/m2/' }
+  }
+  dependencies {
+    classpath group: 'kr.motd.gradle', name: 'sphinx-gradle-plugin', version: '1.0.6'
+    classpath group: 'com.github.jengelman.gradle.plugins', name: 'shadow', version: '2.0.2'
+  }
 }
+
+apply plugin: 'kr.motd.sphinx'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 repositories {
   maven { url 'https://repo.bstats.org/content/repositories/releases/' }
