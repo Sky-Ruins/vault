@@ -8,14 +8,6 @@ jdk:
 install: skip
 script: ./gradlew build
 
-jobs:
-  include:
-    - stage: docs
-      sudo: required
-      python: 3.6
-      install: pip install --user sphinx
-      script: sphinx-build -W docs docs/build
-
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
