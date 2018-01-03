@@ -40,7 +40,6 @@ subprojects {
   license {
     header = rootProject.file('HEADER.txt')
     include '**/*.java'
-    include '**/*.yml'
     newLine = true
   }
 
