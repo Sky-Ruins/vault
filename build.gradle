@@ -6,7 +6,7 @@ allprojects {
   apply plugin: 'idea'
   apply plugin: 'eclipse'
 
-  group = 'org.natrolite'
+  group = 'com.neolumia'
   description = 'Vault is a Permissions, Chat and Economy API'
   version = '1.6.2'
 }
