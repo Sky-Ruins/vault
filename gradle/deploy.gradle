@@ -1,61 +1,25 @@
 apply plugin: 'maven-publish'
-
-ext.isRelease = !(project.version =~ /-SNAPSHOT$/)
+apply plugin: 'com.jfrog.artifactory'
 
 publishing {
-  repositories {
-    if (project.hasProperty("deployUrl")) {
-      maven {
-        credentials {
-          username = "${deployUser}"
-          password = "${deployPass}"
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
         }
-        url = String.format("${deployUrl}", isRelease ? 'releases' : 'snapshots')
-      }
     }
-  }
+}
 
-  publications {
-    maven(MavenPublication) {
-      from components.java
-
-      artifact sourceJar
-      artifact javadocJar
-
-      pom.withXml {
-        asNode().children().last() + {
-          resolveStrategy = DELEGATE_FIRST
-
-          name 'Vault'
-          description project.description
-          url project.url
-          inceptionYear 2018
-
-          ciManagement {
-            system 'Travis CI'
-            url 'https://travis-ci.org/neolumia/vault'
-          }
-
-          issueManagement {
-            system 'GitHub Issues'
-            url 'https://github.com/neolumia/vault/issues'
-          }
-
-          licenses {
-            license {
-              name 'GNU Lesser General Public License (LGPL)'
-              url 'https://www.gnu.org/licenses/lgpl.txt'
-              distribution 'repo'
-            }
-          }
-
-          scm {
-            url 'https://github.com/neolumia/vault'
-            connection 'scm:git:git://github.com/neolumia/vault.git'
-            developerConnection 'scm:git:ssh://github.com:neolumia/vault.git'
-          }
+artifactory {
+    contextUrl = "${artifactory_contextUrl}"
+    publish {
+        repository {
+            repoKey = 'skyruins-local'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
         }
-      }
+        defaults {
+            publications('mavenJava')
+        }
     }
-  }
 }

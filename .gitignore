@@ -12,6 +12,7 @@ atlassian-ide-plugin.xml
 build/
 /local.properties
 gradle-app.setting
+gradle.properties
 !gradle-wrapper.jar
 
 # IDEA
