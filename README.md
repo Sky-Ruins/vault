@@ -1,4 +1,4 @@
-# Vault [![Build Status](https://travis-ci.org/neolumia/vault.svg?branch=master)](https://travis-ci.org/neolumia/vault)
+# Vault [![Build Status](https://travis-ci.org/neolumia/vault.svg?branch=master)](https://travis-ci.org/neolumia/vault) [![Discord](https://img.shields.io/badge/chat-on%20discord-6E85CF.svg)](https://discord.gg/sh3JqmJ)
 
 Vault is a Permissions, Chat and Economy API for Bukkit Developers.
 
