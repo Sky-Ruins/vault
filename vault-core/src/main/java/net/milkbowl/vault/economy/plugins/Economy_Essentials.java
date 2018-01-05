@@ -23,9 +23,6 @@ package net.milkbowl.vault.economy.plugins;
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.api.NoLoanPermittedException;
 import com.earth2me.essentials.api.UserDoesNotExistException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
 import net.milkbowl.vault.economy.AbstractEconomy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
@@ -37,284 +34,290 @@ import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.Plugin;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
 public class Economy_Essentials extends AbstractEconomy {
-  private static final Logger log = Logger.getLogger("Minecraft");
 
-  private final String name = "Essentials Economy";
-  private Plugin plugin = null;
-  private Essentials ess = null;
+    private static final Logger log = Logger.getLogger("Minecraft");
 
-  public Economy_Essentials(Plugin plugin) {
-    this.plugin = plugin;
-    Bukkit.getServer().getPluginManager().registerEvents(new EconomyServerListener(this), plugin);
+    private final String name = "Essentials Economy";
+    private Plugin plugin = null;
+    private Essentials ess = null;
 
-    // Load Plugin in case it was loaded before
-    if (ess == null) {
-      Plugin essentials = plugin.getServer().getPluginManager().getPlugin("Essentials");
-      if (essentials != null && essentials.isEnabled()) {
-        ess = (Essentials) essentials;
-        log.info(String.format("[%s][Economy] %s hooked.", plugin.getDescription().getName(), name));
-      }
-    }
-  }
+    public Economy_Essentials(Plugin plugin) {
+        this.plugin = plugin;
+        Bukkit.getServer().getPluginManager().registerEvents(new EconomyServerListener(this), plugin);
 
-  @Override
-  public boolean isEnabled() {
-    if (ess == null) {
-      return false;
-    } else {
-      return ess.isEnabled();
-    }
-  }
-
-  @Override
-  public String getName() {
-    return name;
-  }
-
-  @Override
-  public double getBalance(String playerName) {
-    double balance;
-
-    try {
-      balance = com.earth2me.essentials.api.Economy.getMoney(playerName);
-    } catch (UserDoesNotExistException e) {
-      createPlayerAccount(playerName);
-      balance = 0;
+        // Load Plugin in case it was loaded before
+        if (ess == null) {
+            Plugin essentials = plugin.getServer().getPluginManager().getPlugin("Essentials");
+            if (essentials != null && essentials.isEnabled()) {
+                ess = (Essentials) essentials;
+                log.info(String.format("[%s][Economy] %s hooked.", plugin.getDescription().getName(), name));
+            }
+        }
     }
 
-    return balance;
-  }
-
-  @Override
-  public boolean createPlayerAccount(String playerName) {
-    if (hasAccount(playerName)) {
-      return false;
-    }
-    return com.earth2me.essentials.api.Economy.createNPC(playerName);
-  }
-
-  @Override
-  public EconomyResponse withdrawPlayer(String playerName, double amount) {
-    if (amount < 0) {
-      return new EconomyResponse(0, 0, ResponseType.FAILURE, "Cannot withdraw negative funds");
+    @Override
+    public boolean isEnabled() {
+        if (ess == null) {
+            return false;
+        } else {
+            return ess.isEnabled();
+        }
     }
 
-    double balance;
-    ResponseType type;
-    String errorMessage = null;
+    @Override
+    public String getName() {
+        return name;
+    }
 
-    try {
-      com.earth2me.essentials.api.Economy.subtract(playerName, amount);
-      balance = com.earth2me.essentials.api.Economy.getMoney(playerName);
-      type = ResponseType.SUCCESS;
-    } catch (UserDoesNotExistException e) {
-      if (createPlayerAccount(playerName)) {
+    @Override
+    public EconomyResponse withdrawPlayer(String playerName, double amount) {
+        if (amount < 0) {
+            return new EconomyResponse(0, 0, ResponseType.FAILURE, "Cannot withdraw negative funds");
+        }
+
+        double balance;
+        ResponseType type;
+        String errorMessage = null;
+
+        try {
+            com.earth2me.essentials.api.Economy.subtract(playerName, amount);
+            balance = com.earth2me.essentials.api.Economy.getMoney(playerName);
+            type = ResponseType.SUCCESS;
+        } catch (UserDoesNotExistException e) {
+            if (createPlayerAccount(playerName)) {
+                return withdrawPlayer(playerName, amount);
+            } else {
+                amount = 0;
+                balance = 0;
+                type = ResponseType.FAILURE;
+                errorMessage = "User does not exist";
+            }
+        } catch (NoLoanPermittedException e) {
+            try {
+                balance = com.earth2me.essentials.api.Economy.getMoney(playerName);
+                amount = 0;
+                type = ResponseType.FAILURE;
+                errorMessage = "Loan was not permitted";
+            } catch (UserDoesNotExistException e1) {
+                amount = 0;
+                balance = 0;
+                type = ResponseType.FAILURE;
+                errorMessage = "User does not exist";
+            }
+        }
+
+        return new EconomyResponse(amount, balance, type, errorMessage);
+    }
+
+    @Override
+    public EconomyResponse depositPlayer(String playerName, double amount) {
+        if (amount < 0) {
+            return new EconomyResponse(0, 0, ResponseType.FAILURE, "Cannot desposit negative funds");
+        }
+
+        double balance;
+        ResponseType type;
+        String errorMessage = null;
+
+        try {
+            com.earth2me.essentials.api.Economy.add(playerName, amount);
+            balance = com.earth2me.essentials.api.Economy.getMoney(playerName);
+            type = ResponseType.SUCCESS;
+        } catch (UserDoesNotExistException e) {
+            if (createPlayerAccount(playerName)) {
+                return depositPlayer(playerName, amount);
+            } else {
+                amount = 0;
+                balance = 0;
+                type = ResponseType.FAILURE;
+                errorMessage = "User does not exist";
+            }
+        } catch (NoLoanPermittedException e) {
+            try {
+                balance = com.earth2me.essentials.api.Economy.getMoney(playerName);
+                amount = 0;
+                type = ResponseType.FAILURE;
+                errorMessage = "Loan was not permitted";
+            } catch (UserDoesNotExistException e1) {
+                balance = 0;
+                amount = 0;
+                type = ResponseType.FAILURE;
+                errorMessage = "Loan was not permitted";
+            }
+        }
+
+        return new EconomyResponse(amount, balance, type, errorMessage);
+    }
+
+    @Override
+    public String format(double amount) {
+        return com.earth2me.essentials.api.Economy.format(amount);
+    }
+
+    @Override
+    public String currencyNameSingular() {
+        return "";
+    }
+
+    @Override
+    public String currencyNamePlural() {
+        return "";
+    }
+
+    @Override
+    public EconomyResponse createBank(String name, String player) {
+        return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, "Essentials Eco does not support bank accounts!");
+    }
+
+    @Override
+    public EconomyResponse deleteBank(String name) {
+        return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, "Essentials Eco does not support bank accounts!");
+    }
+
+    @Override
+    public EconomyResponse bankHas(String name, double amount) {
+        return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, "Essentials Eco does not support bank accounts!");
+    }
+
+    @Override
+    public EconomyResponse bankWithdraw(String name, double amount) {
+        return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, "Essentials Eco does not support bank accounts!");
+    }
+
+    @Override
+    public EconomyResponse bankDeposit(String name, double amount) {
+        return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, "Essentials Eco does not support bank accounts!");
+    }
+
+    @Override
+    public EconomyResponse isBankOwner(String name, String playerName) {
+        return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, "Essentials Eco does not support bank accounts!");
+    }
+
+    @Override
+    public EconomyResponse isBankMember(String name, String playerName) {
+        return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, "Essentials Eco does not support bank accounts!");
+    }
+
+    @Override
+    public EconomyResponse bankBalance(String name) {
+        return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, "Essentials Eco does not support bank accounts!");
+    }
+
+    @Override
+    public List<String> getBanks() {
+        return new ArrayList<String>();
+    }
+
+    @Override
+    public boolean hasBankSupport() {
+        return false;
+    }
+
+    @Override
+    public int fractionalDigits() {
+        return -1;
+    }
+
+    @Override
+    public boolean hasAccount(String playerName, String worldName) {
+        return hasAccount(playerName);
+    }
+
+    @Override
+    public boolean hasAccount(String playerName) {
+        return com.earth2me.essentials.api.Economy.playerExists(playerName);
+    }
+
+    @Override
+    public double getBalance(String playerName, String world) {
+        return getBalance(playerName);
+    }
+
+    @Override
+    public double getBalance(String playerName) {
+        double balance;
+
+        try {
+            balance = com.earth2me.essentials.api.Economy.getMoney(playerName);
+        } catch (UserDoesNotExistException e) {
+            createPlayerAccount(playerName);
+            balance = 0;
+        }
+
+        return balance;
+    }
+
+    @Override
+    public boolean createPlayerAccount(String playerName) {
+        if (hasAccount(playerName)) {
+            return false;
+        }
+        return com.earth2me.essentials.api.Economy.createNPC(playerName);
+    }
+
+    @Override
+    public boolean has(String playerName, String worldName, double amount) {
+        return has(playerName, amount);
+    }
+
+    @Override
+    public boolean has(String playerName, double amount) {
+        try {
+            return com.earth2me.essentials.api.Economy.hasEnough(playerName, amount);
+        } catch (UserDoesNotExistException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public EconomyResponse withdrawPlayer(String playerName, String worldName, double amount) {
         return withdrawPlayer(playerName, amount);
-      } else {
-        amount = 0;
-        balance = 0;
-        type = ResponseType.FAILURE;
-        errorMessage = "User does not exist";
-      }
-    } catch (NoLoanPermittedException e) {
-      try {
-        balance = com.earth2me.essentials.api.Economy.getMoney(playerName);
-        amount = 0;
-        type = ResponseType.FAILURE;
-        errorMessage = "Loan was not permitted";
-      } catch (UserDoesNotExistException e1) {
-        amount = 0;
-        balance = 0;
-        type = ResponseType.FAILURE;
-        errorMessage = "User does not exist";
-      }
     }
 
-    return new EconomyResponse(amount, balance, type, errorMessage);
-  }
-
-  @Override
-  public EconomyResponse depositPlayer(String playerName, double amount) {
-    if (amount < 0) {
-      return new EconomyResponse(0, 0, ResponseType.FAILURE, "Cannot desposit negative funds");
-    }
-
-    double balance;
-    ResponseType type;
-    String errorMessage = null;
-
-    try {
-      com.earth2me.essentials.api.Economy.add(playerName, amount);
-      balance = com.earth2me.essentials.api.Economy.getMoney(playerName);
-      type = ResponseType.SUCCESS;
-    } catch (UserDoesNotExistException e) {
-      if (createPlayerAccount(playerName)) {
+    @Override
+    public EconomyResponse depositPlayer(String playerName, String worldName, double amount) {
         return depositPlayer(playerName, amount);
-      } else {
-        amount = 0;
-        balance = 0;
-        type = ResponseType.FAILURE;
-        errorMessage = "User does not exist";
-      }
-    } catch (NoLoanPermittedException e) {
-      try {
-        balance = com.earth2me.essentials.api.Economy.getMoney(playerName);
-        amount = 0;
-        type = ResponseType.FAILURE;
-        errorMessage = "Loan was not permitted";
-      } catch (UserDoesNotExistException e1) {
-        balance = 0;
-        amount = 0;
-        type = ResponseType.FAILURE;
-        errorMessage = "Loan was not permitted";
-      }
     }
 
-    return new EconomyResponse(amount, balance, type, errorMessage);
-  }
-
-  @Override
-  public String format(double amount) {
-    return com.earth2me.essentials.api.Economy.format(amount);
-  }
-
-  @Override
-  public String currencyNameSingular() {
-    return "";
-  }
-
-  @Override
-  public String currencyNamePlural() {
-    return "";
-  }
-
-  @Override
-  public boolean has(String playerName, double amount) {
-    try {
-      return com.earth2me.essentials.api.Economy.hasEnough(playerName, amount);
-    } catch (UserDoesNotExistException e) {
-      return false;
-    }
-  }
-
-  @Override
-  public EconomyResponse createBank(String name, String player) {
-    return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, "Essentials Eco does not support bank accounts!");
-  }
-
-  @Override
-  public EconomyResponse deleteBank(String name) {
-    return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, "Essentials Eco does not support bank accounts!");
-  }
-
-  @Override
-  public EconomyResponse bankHas(String name, double amount) {
-    return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, "Essentials Eco does not support bank accounts!");
-  }
-
-  @Override
-  public EconomyResponse bankWithdraw(String name, double amount) {
-    return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, "Essentials Eco does not support bank accounts!");
-  }
-
-  @Override
-  public EconomyResponse bankDeposit(String name, double amount) {
-    return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, "Essentials Eco does not support bank accounts!");
-  }
-
-  @Override
-  public EconomyResponse isBankOwner(String name, String playerName) {
-    return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, "Essentials Eco does not support bank accounts!");
-  }
-
-  @Override
-  public EconomyResponse isBankMember(String name, String playerName) {
-    return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, "Essentials Eco does not support bank accounts!");
-  }
-
-  @Override
-  public EconomyResponse bankBalance(String name) {
-    return new EconomyResponse(0, 0, ResponseType.NOT_IMPLEMENTED, "Essentials Eco does not support bank accounts!");
-  }
-
-  @Override
-  public List<String> getBanks() {
-    return new ArrayList<String>();
-  }
-
-  @Override
-  public boolean hasBankSupport() {
-    return false;
-  }
-
-  @Override
-  public boolean hasAccount(String playerName) {
-    return com.earth2me.essentials.api.Economy.playerExists(playerName);
-  }
-
-  @Override
-  public int fractionalDigits() {
-    return -1;
-  }
-
-  @Override
-  public boolean hasAccount(String playerName, String worldName) {
-    return hasAccount(playerName);
-  }
-
-  @Override
-  public double getBalance(String playerName, String world) {
-    return getBalance(playerName);
-  }
-
-  @Override
-  public boolean has(String playerName, String worldName, double amount) {
-    return has(playerName, amount);
-  }
-
-  @Override
-  public EconomyResponse withdrawPlayer(String playerName, String worldName, double amount) {
-    return withdrawPlayer(playerName, amount);
-  }
-
-  @Override
-  public EconomyResponse depositPlayer(String playerName, String worldName, double amount) {
-    return depositPlayer(playerName, amount);
-  }
-
-  @Override
-  public boolean createPlayerAccount(String playerName, String worldName) {
-    return createPlayerAccount(playerName);
-  }
-
-  public class EconomyServerListener implements Listener {
-    Economy_Essentials economy = null;
-
-    public EconomyServerListener(Economy_Essentials economy) {
-      this.economy = economy;
+    @Override
+    public boolean createPlayerAccount(String playerName, String worldName) {
+        return createPlayerAccount(playerName);
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onPluginEnable(PluginEnableEvent event) {
-      if (economy.ess == null) {
-        Plugin essentials = event.getPlugin();
+    public class EconomyServerListener implements Listener {
 
-        if (essentials.getDescription().getName().equals("Essentials")) {
-          economy.ess = (Essentials) essentials;
-          log.info(String.format("[%s][Economy] %s hooked.", plugin.getDescription().getName(), economy.name));
+        Economy_Essentials economy = null;
+
+        public EconomyServerListener(Economy_Essentials economy) {
+            this.economy = economy;
         }
-      }
-    }
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onPluginDisable(PluginDisableEvent event) {
-      if (economy.ess != null) {
-        if (event.getPlugin().getDescription().getName().equals("Essentials")) {
-          economy.ess = null;
-          log.info(String.format("[%s][Economy] %s unhooked.", plugin.getDescription().getName(), economy.name));
+        @EventHandler(priority = EventPriority.MONITOR)
+        public void onPluginEnable(PluginEnableEvent event) {
+            if (economy.ess == null) {
+                Plugin essentials = event.getPlugin();
+
+                if (essentials.getDescription().getName().equals("Essentials")) {
+                    economy.ess = (Essentials) essentials;
+                    log.info(String.format("[%s][Economy] %s hooked.", plugin.getDescription().getName(), economy.name));
+                }
+            }
         }
-      }
+
+        @EventHandler(priority = EventPriority.MONITOR)
+        public void onPluginDisable(PluginDisableEvent event) {
+            if (economy.ess != null) {
+                if (event.getPlugin().getDescription().getName().equals("Essentials")) {
+                    economy.ess = null;
+                    log.info(String.format("[%s][Economy] %s unhooked.", plugin.getDescription().getName(), economy.name));
+                }
+            }
+        }
     }
-  }
 }

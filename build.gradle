@@ -1,67 +1,50 @@
 plugins {
-  id 'net.minecrell.licenser' version '0.3' apply false
+    id 'net.minecrell.licenser' version '0.3' apply false
+    id 'com.jfrog.artifactory' version '4.6.0' apply false
 }
 
 allprojects {
-  apply plugin: 'idea'
-  apply plugin: 'eclipse'
+    apply plugin: 'idea'
 
-  group = 'com.neolumia'
-  description = 'Vault is a Permissions, Chat and Economy API'
-  version = '1.6.2'
+    group = 'com.neolumia'
+    description = 'Vault is a Permissions, Chat and Economy API'
+    version = '1.6.2'
 }
 
 ext {
-  url = 'https://neolumia.com/'
-  bukkitVersion = '1.9-R0.1-SNAPSHOT'
+    url = 'https://neolumia.com/'
+    bukkitVersion = '1.12.2-R0.1-SNAPSHOT'
 }
 
 subprojects {
-  apply plugin: 'java'
-  apply plugin: 'net.minecrell.licenser'
+    apply plugin: 'java'
+    apply plugin: 'net.minecrell.licenser'
 
-  sourceCompatibility = '1.8'
-  targetCompatibility = '1.8'
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
 
-  repositories {
-    mavenCentral()
-    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
-  }
+    repositories {
+        mavenCentral()
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+        maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+    }
 
-  dependencies {
-    compileOnly group: 'org.bukkit', name: 'bukkit', version: bukkitVersion
-    testCompile group: 'org.bukkit', name: 'bukkit', version: bukkitVersion
-  }
+    dependencies {
+        compileOnly group: 'org.bukkit', name: 'bukkit', version: bukkitVersion
+        testCompileOnly group: 'org.bukkit', name: 'bukkit', version: bukkitVersion
+    }
 
-  processResources {
-    from rootProject.file('LICENSE')
-  }
+    processResources {
+        from rootProject.file('LICENSE')
+    }
 
-  license {
-    header = rootProject.file('HEADER.txt')
-    include '**/*.java'
-    newLine = true
-  }
-
-  task sourceJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-  }
-
-  task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-  }
-
-  artifacts {
-    archives sourceJar
-    archives javadocJar
-  }
-
-  apply from: rootProject.file('gradle/deploy.gradle')
+    license {
+        header = rootProject.file('HEADER.txt')
+        include '**/*.java'
+        newLine = true
+    }
 }
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '4.4'
+    gradleVersion = '4.4'
 }
